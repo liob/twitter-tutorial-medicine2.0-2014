@@ -3,17 +3,17 @@
 from twitter import *
 from mpl_toolkits.basemap import Basemap
 import matplotlib.pyplot as plt
+from tools import print_tweet
 
 
-map = Basemap(projection='merc', lat_0 = 50, lon_0 = -100,
-              resolution = 'l', area_thresh = 1000.)
-map.drawcoastlines()
-map.drawcountries()
-map.fillcontinents(color = 'coral')
-map.drawmapboundary()
-map.drawmeridians(np.arange(0, 360, 30))
-map.drawparallels(np.arange(-90, 90, 30))
-plt.show()
+search_for = 'flu'
+
+m = Basemap(projection='robin',lon_0=0,resolution='c')
+m.drawcoastlines()
+m.fillcontinents(color='coral',lake_color='aqua')
+m.drawmapboundary(fill_color='aqua')
+plt.title("Density Map")
+plt.show(block=False)
 
 auth = OAuth(
     '1384877240-NozLxjgB70Ifi2E6QRIuXYIsSUV6LPX5p2Wxi8w',
@@ -23,8 +23,13 @@ auth = OAuth(
 
 ts = TwitterStream(auth=auth)
 
-openstream = ts.statuses.filter(track='flu')
+stream = ts.statuses.filter(track=search_for)
 
-for item in openstream:
-    print "id:%s %s :: %s" % (item['id'], str(item['coordinates']), item['text'])
-
+for tweet in stream:
+    # tweet information description: https://dev.twitter.com/docs/platform-objects/tweets
+    if tweet['coordinates']: # there are geo coordinates attached
+        lon, lat = tweet['coordinates']['coordinates']
+        x,y = m(lon, lat)
+        m.plot(x, y, 'bo', markersize=8)
+        plt.draw()
+    print_tweet(tweet)
