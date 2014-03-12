@@ -3,7 +3,7 @@
 from twitter import *
 from mpl_toolkits.basemap import Basemap
 import matplotlib.pyplot as plt
-from tools import print_tweet
+from tools import print_tweet, get_geolocation
 
 
 search_for = 'flu'
@@ -27,8 +27,9 @@ stream = ts.statuses.filter(track=search_for)
 
 for tweet in stream:
     # tweet information description: https://dev.twitter.com/docs/platform-objects/tweets
-    if tweet['coordinates']: # there are geo coordinates attached
-        lon, lat = tweet['coordinates']['coordinates']
+    geolocation = get_geolocation(tweet)
+    if geolocation: # there are geo coordinates attached
+        lon, lat = geolocation['coordinates']
         x,y = m(lon, lat)
         m.plot(x, y, 'bo', markersize=8)
         plt.draw()
